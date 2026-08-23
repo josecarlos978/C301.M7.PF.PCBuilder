@@ -6,7 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "eslint"
+        "lint": "eslint",
+        "seed": "tsx prisma/seed.ts"
     },
     "dependencies": {
         "@base-ui/react": "^1.6.0",
@@ -19,6 +20,8 @@
         "@fullcalendar/react": "^6.1.20",
         "@fullcalendar/timegrid": "^6.1.20",
         "@internationalized/date": "^3.12.2",
+        "@prisma/adapter-pg": "^7.9.1",
+        "@prisma/client": "^7.9.1",
         "@tailgrids/icons": "^2.0.0",
         "@tanstack/react-query": "^5.101.2",
         "@tanstack/react-table": "^8.21.3",
@@ -50,12 +53,15 @@
         "@types/node": "20.19.43",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "dotenv": "^17.4.2",
         "eslint": "^9",
         "eslint-config-next": "16.2.7",
         "playwright": "^1.49.0",
         "prettier": "^3.8.4",
         "prettier-plugin-tailwindcss": "^0.8.0",
+        "prisma": "^7.9.1",
         "tailwindcss": "^4",
+        "tsx": "^4.23.12",
         "typescript": "^5"
     }
 }

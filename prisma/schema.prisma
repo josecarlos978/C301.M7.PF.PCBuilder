@@ -1,0 +1,75 @@
+// PCBuilder - CRM + Configurador de PCs
+// Modelos según docs/03.Especificaciones para el agente/01.Guia implementacion.md
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Producto {
+  id           Int                 @id @default(autoincrement())
+  nombre       String
+  marca        String
+  precioVenta  Float
+  categoria    String
+  subcategoria String
+  atributos    ProductoAtributo[]
+  cotizaciones CotizacionDetalle[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([categoria, subcategoria])
+}
+
+model ProductoAtributo {
+  id         Int      @id @default(autoincrement())
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  productoId Int
+  clave      String // ej: socket, tipoMemoria, tdp
+  valor      String // ej: AM5, DDR5, 65
+  createdAt  DateTime @default(now())
+
+  @@unique([productoId, clave])
+  @@index([clave, valor])
+}
+
+model Cliente {
+  id           Int          @id @default(autoincrement())
+  nombre       String
+  correo       String
+  telefono     String?
+  cotizaciones Cotizacion[]
+  createdAt    DateTime     @default(now())
+}
+
+model Cotizacion {
+  id          Int                 @id @default(autoincrement())
+  cliente     Cliente             @relation(fields: [clienteId], references: [id])
+  clienteId   Int
+  fecha       DateTime            @default(now())
+  total       Float
+  estado      String // Borrador | Confirmada | Rechazada
+  detalles    CotizacionDetalle[]
+  createdAt   DateTime            @default(now())
+
+  @@index([clienteId])
+  @@index([estado])
+}
+
+model CotizacionDetalle {
+  id             Int       @id @default(autoincrement())
+  cotizacion     Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  cotizacionId   Int
+  producto       Producto   @relation(fields: [productoId], references: [id])
+  productoId     Int
+  cantidad       Int        @default(1)
+  precioUnitario Float
+  createdAt      DateTime   @default(now())
+
+  @@index([cotizacionId])
+  @@index([productoId])
+}
