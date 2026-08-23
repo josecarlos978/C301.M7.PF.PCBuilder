@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   const seleccion = {
     cpuId: numeroDe(searchParams.get("cpuId")),
     placaId: numeroDe(searchParams.get("placaId")),
+    ramIds: listaDeNumeros(searchParams.get("ramIds")),
     gpuId: numeroDe(searchParams.get("gpuId")),
     coolerId: numeroDe(searchParams.get("coolerId")),
     caseId: numeroDe(searchParams.get("caseId")),
@@ -31,4 +32,10 @@ function numeroDe(valor: string | null): number | undefined {
   if (!valor) return undefined;
   const n = Number(valor);
   return Number.isInteger(n) && n > 0 ? n : undefined;
+}
+
+function listaDeNumeros(valor: string | null): number[] | undefined {
+  if (!valor) return undefined;
+  const ids = valor.split(",").map(numeroDe).filter((n): n is number => n !== undefined);
+  return ids.length > 0 ? ids : undefined;
 }

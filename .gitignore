@@ -45,7 +45,7 @@ next-env.d.ts
 /src/generated/prisma
 
 # dev server logs
-dev-server.log
+dev-server*.log
 
 # credenciales (contiene connection string real)
 documentos/03.Especificaciones para el agente/06.Credenciales.md

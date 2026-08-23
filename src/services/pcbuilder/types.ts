@@ -2,6 +2,8 @@ export interface AtributosProducto {
   [clave: string]: string;
 }
 
+export type { Paso } from "./constants";
+
 export interface ProductoDTO {
   id: number;
   nombre: string;

@@ -1,14 +1,52 @@
 import {
   AlphabetIcon,
   HomeIcon,
+  InvoiceIcon,
   PieChartIcon,
   TableIcon,
+  TaskIcon,
+  UserGroupIcon,
   UserIcon,
   Widget4Icon,
   WindowIcon
 } from "./icon";
 
 export const NAV_DATA = [
+  {
+    label: "PCBUILDER",
+    items: [
+      {
+        title: "Configurador de PC",
+        url: "/configurador",
+        icon: <TaskIcon />,
+        items: [],
+      },
+      {
+        title: "Clientes",
+        url: "/clientes",
+        icon: <UserGroupIcon />,
+        items: [],
+      },
+      {
+        title: "Productos",
+        url: "/productos",
+        icon: <AlphabetIcon />,
+        items: [],
+      },
+      {
+        title: "Cotizaciones",
+        url: "/cotizaciones",
+        icon: <InvoiceIcon />,
+        items: [],
+      },
+      {
+        title: "Reportes",
+        url: "/reportes",
+        icon: <PieChartIcon />,
+        items: [],
+      },
+    ],
+  },
   {
     label: "MAIN MENU",
     items: [
