@@ -26,6 +26,7 @@ import {
 import { cambiarEstadoCotizacion, obtenerCotizacion } from "@/services/api/cotizaciones/client";
 import { ESTADOS_COTIZACION } from "@/services/pcbuilder/constants";
 import formatCurrency from "@/utils/format-currency";
+import { AccionesCotizacion } from "./acciones-cotizacion";
 
 interface CotizacionDetalleViewProps {
   id: number;
@@ -138,6 +139,8 @@ export default function CotizacionDetalleView({ id }: CotizacionDetalleViewProps
                 </p>
               </CardContent>
             </Card>
+
+            <AccionesCotizacion cotizacion={cotizacion} />
 
             <Button appearance="outline" size="sm" onPress={() => history.back()}>
               <ArrowLeft className="size-4" />
