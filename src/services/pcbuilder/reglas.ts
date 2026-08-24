@@ -32,10 +32,14 @@ function evaluarPlaca(placa: ProductoDTO, sel: ProductosResueltos): string[] {
       motivos.push(`Socket incompatible: el CPU requiere ${socketCpu} y la placa es ${socketPlaca}`);
     }
 
-    const memoriaCpu = texto(cpu.atributos, "tipoMemoria");
-    const memoriaPlaca = texto(placa.atributos, "tipoMemoria");
-    if (memoriaCpu && memoriaPlaca && memoriaCpu.toLowerCase() !== memoriaPlaca.toLowerCase()) {
-      motivos.push(`Tipo de memoria incompatible: el CPU requiere ${memoriaCpu} y la placa es ${memoriaPlaca}`);
+    const memoriasCpu = lista(cpu.atributos, "tipoMemoria").map((m) => m.toLowerCase());
+    const memoriasPlaca = lista(placa.atributos, "tipoMemoria").map((m) => m.toLowerCase());
+    if (
+      memoriasCpu.length > 0 &&
+      memoriasPlaca.length > 0 &&
+      !memoriasPlaca.some((memoriaPlaca) => memoriasCpu.includes(memoriaPlaca))
+    ) {
+      motivos.push(`Tipo de memoria incompatible: el CPU soporta ${lista(cpu.atributos, "tipoMemoria").join(" / ")} y la placa es ${texto(placa.atributos, "tipoMemoria")}`);
     }
   }
 
@@ -47,10 +51,14 @@ function evaluarRam(ram: ProductoDTO, sel: ProductosResueltos): string[] {
   const placa = sel.placa;
 
   if (placa) {
-    const memoriaPlaca = texto(placa.atributos, "tipoMemoria");
-    const memoriaRam = texto(ram.atributos, "tipoMemoria");
-    if (memoriaPlaca && memoriaRam && memoriaPlaca.toLowerCase() !== memoriaRam.toLowerCase()) {
-      motivos.push(`Tipo de memoria incompatible: la placa soporta ${memoriaPlaca} y la RAM es ${memoriaRam}`);
+    const memoriasPlaca = lista(placa.atributos, "tipoMemoria").map((m) => m.toLowerCase());
+    const memoriasRam = lista(ram.atributos, "tipoMemoria").map((m) => m.toLowerCase());
+    if (
+      memoriasPlaca.length > 0 &&
+      memoriasRam.length > 0 &&
+      !memoriasRam.some((memoriaRam) => memoriasPlaca.includes(memoriaRam))
+    ) {
+      motivos.push(`Tipo de memoria incompatible: la placa soporta ${lista(placa.atributos, "tipoMemoria").join(" / ")} y la RAM es ${texto(ram.atributos, "tipoMemoria")}`);
     }
   }
 
@@ -101,7 +109,7 @@ function evaluarCase(casePc: ProductoDTO, sel: ProductosResueltos): string[] {
 
   const cooler = sel.cooler;
   if (cooler) {
-    const ventiladoresCooler = numero(cooler.atributos, "ventiladores");
+    const ventiladoresCooler = numero(cooler.atributos, "numeroVentiladores");
     const ventiladoresCase = numero(casePc.atributos, "soportaFanCoolerVentiladores");
     if (ventiladoresCooler !== undefined && ventiladoresCase !== undefined && ventiladoresCase < ventiladoresCooler) {
       motivos.push(`Ventiladores insuficientes: el cooler usa ${ventiladoresCooler} y el case admite ${ventiladoresCase}`);
@@ -171,6 +179,15 @@ export function validarSeleccion(sel: ProductosResueltos): ResultadoValidacion {
   }
 
   if (sel.placa) {
+    const memoriasPlaca = lista(sel.placa.atributos, "tipoMemoria").map((m) => m.toLowerCase());
+
+    for (const modulo of sel.ram) {
+      const memoriaRam = texto(modulo.atributos, "tipoMemoria")?.toLowerCase();
+      if (memoriasPlaca.length > 0 && memoriaRam && !memoriasPlaca.includes(memoriaRam)) {
+        errores.push(`La RAM ${modulo.nombre} es ${texto(modulo.atributos, "tipoMemoria")} y la placa soporta ${lista(sel.placa.atributos, "tipoMemoria").join(" / ")}.`);
+      }
+    }
+
     const slots = numero(sel.placa.atributos, "ramSlots");
     if (slots !== undefined && sel.ram.length > slots) {
       errores.push(`La configuración excede los ${slots} slots de RAM disponibles en la placa (${sel.ram.length} módulos seleccionados).`);
