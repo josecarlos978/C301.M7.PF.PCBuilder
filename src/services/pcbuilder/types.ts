@@ -2,6 +2,12 @@ export interface AtributosProducto {
   [clave: string]: string;
 }
 
+export interface DatosCliente {
+  nombre: string;
+  correo: string;
+  telefono?: string;
+}
+
 export type { Paso } from "./constants";
 
 export interface ProductoDTO {

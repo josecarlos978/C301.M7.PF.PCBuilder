@@ -12,6 +12,10 @@ export function listarProductos(filtros: { categoria?: string; busca?: string } 
   return apiGet(`/api/productos${query ? `?${query}` : ""}`);
 }
 
+export function obtenerProducto(id: number): Promise<ProductoDTO | null> {
+  return apiGet(`/api/productos/${id}`);
+}
+
 export function crearProducto(input: ProductoInput): Promise<ProductoDTO> {
   return apiPost("/api/productos", input);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { DatosCliente } from "./cotizacion-archivos";
+import type { DatosCliente } from "@/services/pcbuilder/types";
 
 export function useDatosCliente() {
   const [nombre, setNombre] = useState("");

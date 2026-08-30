@@ -17,8 +17,8 @@ import type { DetalleCotizacionInput, CotizacionDTO } from "@/services/api/cotiz
 import { crearCotizacion } from "@/services/api/cotizaciones/client";
 import { crearCliente } from "@/services/api/clientes/client";
 import { abrirWhatsApp, construirMensajeWhatsApp } from "./cotizacion-archivos";
-import { DatosClienteForm } from "./datos-cliente-form";
-import { useDatosCliente } from "./use-datos-cliente";
+import { DatosClienteForm } from "@/components/tienda/datos-cliente-form";
+import { useDatosCliente } from "@/components/tienda/use-datos-cliente";
 import type { FilaResumen } from "./resumen-panel";
 
 interface EnviarWhatsAppDialogProps {

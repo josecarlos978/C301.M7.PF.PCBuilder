@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Cart2, CheckCircle1, Whatsapp } from "@tailgrids/icons";
+import { BagShopping2, CheckCircle1, Whatsapp } from "@tailgrids/icons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/tailgrids/core/button";
@@ -14,29 +14,35 @@ import {
   DialogTitle,
 } from "@/components/tailgrids/core/dialog";
 import { WHATSAPP_ADMIN } from "@/config/tienda";
-import type { CotizacionDTO, DetalleCotizacionInput } from "@/services/api/cotizaciones/client";
-import { crearCotizacion } from "@/services/api/cotizaciones/client";
 import { crearCliente } from "@/services/api/clientes/client";
-import { abrirWhatsApp, construirMensajeWhatsApp } from "./cotizacion-archivos";
-import { DatosClienteForm } from "@/components/tienda/datos-cliente-form";
-import { useDatosCliente } from "@/components/tienda/use-datos-cliente";
-import type { FilaResumen } from "./resumen-panel";
+import {
+  crearCotizacion,
+  type CotizacionDTO,
+  type DetalleCotizacionInput,
+} from "@/services/api/cotizaciones/client";
+import formatCurrency from "@/utils/format-currency";
+import type { ItemCarrito } from "./carrito-context";
+import { DatosClienteForm } from "./datos-cliente-form";
+import { useDatosCliente } from "./use-datos-cliente";
+import { abrirWhatsApp, construirMensajeCarritoWhatsApp } from "./whatsapp";
 
-interface ComprarOnlineDialogProps {
+interface SolicitarCotizacionDialogProps {
   abierto: boolean;
   onOpenChange: (abierto: boolean) => void;
-  filas: FilaResumen[];
+  items: ItemCarrito[];
   total: number;
   detalles: DetalleCotizacionInput[];
+  onRegistrada: () => void;
 }
 
-export function ComprarOnlineDialog({
+export function SolicitarCotizacionDialog({
   abierto,
   onOpenChange,
-  filas,
+  items,
   total,
   detalles,
-}: ComprarOnlineDialogProps) {
+  onRegistrada,
+}: SolicitarCotizacionDialogProps) {
   const cliente = useDatosCliente();
   const [cotizacionCreada, setCotizacionCreada] = useState<CotizacionDTO | null>(null);
 
@@ -58,6 +64,7 @@ export function ComprarOnlineDialog({
 
   function cerrar() {
     cliente.limpiar();
+    if (cotizacionCreada) onRegistrada();
     setCotizacionCreada(null);
     onOpenChange(false);
   }
@@ -66,7 +73,15 @@ export function ComprarOnlineDialog({
     if (!cotizacionCreada) return;
     abrirWhatsApp(
       WHATSAPP_ADMIN,
-      construirMensajeWhatsApp(filas, cliente.datos(), cotizacionCreada.id),
+      construirMensajeCarritoWhatsApp(
+        items.map((item) => ({
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad,
+          precioUnitario: item.producto.precioVenta,
+        })),
+        cliente.datos(),
+        cotizacionCreada.id,
+      ),
     );
     cerrar();
   }
@@ -82,10 +97,10 @@ export function ComprarOnlineDialog({
   return (
     <Dialog isOpen={abierto} onOpenChange={manejarOpenChange}>
       <DialogHeader>
-        <DialogTitle>Comprar online</DialogTitle>
+        <DialogTitle>Solicitar cotización</DialogTitle>
         <DialogDescription>
-          Registra tu solicitud de compra con tu build de <strong>{detalles.length}</strong>{" "}
-          parte(s), valorada en <strong>${total.toFixed(2)}</strong>.
+          Registra tu solicitud de cotización con <strong>{items.length}</strong> producto(s),
+          valorada en <strong>{formatCurrency(total)}</strong>.
         </DialogDescription>
       </DialogHeader>
 
@@ -123,7 +138,7 @@ export function ComprarOnlineDialog({
             </Button>
             <Button variant="success" onPress={reenviarWhatsApp}>
               <Whatsapp className="size-4" />
-              Enviar también por WhatsApp
+              Enviar por WhatsApp
             </Button>
           </>
         ) : (
@@ -132,10 +147,11 @@ export function ComprarOnlineDialog({
               Cancelar
             </Button>
             <Button
+              variant="success"
               onPress={() => registrarMutation.mutate()}
               isDisabled={!cliente.formularioValido || registrarMutation.isPending}
             >
-              <Cart2 className="size-4" />
+              <BagShopping2 className="size-4" />
               {registrarMutation.isPending ? "Registrando..." : "Registrar solicitud"}
             </Button>
           </>

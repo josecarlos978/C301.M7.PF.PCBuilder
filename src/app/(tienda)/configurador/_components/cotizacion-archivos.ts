@@ -1,11 +1,10 @@
 import type { FilaResumen } from "./resumen-panel";
 import { NOMBRE_TIENDA } from "@/config/tienda";
+import type { DatosCliente } from "@/services/pcbuilder/types";
+import { abrirWhatsApp } from "@/components/tienda/whatsapp";
 
-export interface DatosCliente {
-  nombre: string;
-  correo: string;
-  telefono?: string;
-}
+export { abrirWhatsApp };
+export type { DatosCliente };
 
 function fechaLarga(fecha = new Date()): string {
   return new Intl.DateTimeFormat("es-EC", {
@@ -58,11 +57,6 @@ export function construirMensajeWhatsApp(
   ].filter(Boolean);
 
   return lineas.join("\n");
-}
-
-export function abrirWhatsApp(numeroAdmin: string, mensaje: string): void {
-  const url = `https://wa.me/${numeroAdmin}?text=${encodeURIComponent(mensaje)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 export function descargarCotizacionHtml(
