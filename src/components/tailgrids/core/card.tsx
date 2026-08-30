@@ -4,13 +4,14 @@ import { cn } from '@/utils/cn';
 import { ComponentProps } from 'react';
 import { Heading, HeadingProps } from 'react-aria-components';
 
-export function Card({ children, className }: ComponentProps<'div'>) {
+export function Card({ children, className, ...rest }: ComponentProps<'div'>) {
     return (
         <div
             className={cn(
                 'rounded-xl border-[0.5px] border-card-border bg-card-background p-5',
                 className,
             )}
+            {...rest}
         >
             {children}
         </div>

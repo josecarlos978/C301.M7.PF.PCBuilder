@@ -1,0 +1,146 @@
+# COTIZADOR Y CONFIGURADOR DE EQUIPOS (PC BUILDER) — ESPECIFICACIÓN TÉCNICA
+
+Documento de planificación y arquitectura para la implementación del módulo de Configuración y Cotización de Equipos de Cómputo, integrado con el catálogo único de productos del ERP CyM.
+
+## 1. Visión General del Módulo
+
+El objetivo es proveer una herramienta interactiva que permita armar computadoras de escritorio (PC Builder) garantizando la compatibilidad técnica de hardware en tiempo real.
+
+El módulo operará sobre la misma base de datos unificada del ERP, pero se desplegará en dos niveles:
+
+### 1.1 Nivel Administrativo (ERP Interno)
+
+- Utilizado por vendedores, asesores y caja.
+- Permite forzar o ajustar reglas ante excepciones solicitadas por el cliente.
+- Convierte el armado en una Cotización ERP o Venta directa con stock real, generando PDF y descontando componentes individuales o combos.
+
+### 1.2 Nivel Público (E-commerce Catálogo Web)
+
+- Herramienta de autoservicio y atracción de clientes (Leads).
+- Reglas de compatibilidad estrictas y bloqueantes.
+- Finaliza en Comprar Online o Enviar Cotización a WhatsApp / Correo, registrando un borrador dentro del ERP.
+
+## 2. Arquitectura de Compatibilidad (Pivote por Atributos)
+
+En lugar de crear relaciones manuales producto por producto, la compatibilidad se calculará mediante un esquema de atributos clave (Clave - Valor) en la base de datos.
+
+### 2.1 Atributos Requeridos por Componente
+
+#### Procesador (CPU)
+
+- **marca**: Marca del componente (ej. Intel, AMD)
+- **socket**: Identificador de socket (ej. AM4, AM5, LGA1700, LGA1851)
+- **tipoMemoria**: Tipo de memoria compatible (ej. DDR4, DDR5)
+- **requiereCooler**: Boolean (Determina si la selección de Cooler en el Paso 5 es Obligatoria u Opcional)
+- **tdp**: Consumo térmico base y máximo en Watts
+- **tieneGraficosIntegrados**: Boolean
+
+#### Placa Madre (Motherboard)
+
+- **marca**: Marca del fabricante (ej. ASUS, GIGABYTE, MSI, ASRock)
+- **socket**: Match obligatorio con CPU
+- **tipoMemoria**: Match obligatorio con RAM (DDR4, DDR5)
+- **factorForma**: Factor de forma físico (ej. ATX, Micro-ATX, Mini-ITX)
+- **ramSlots**: Número de ranuras para memoria RAM
+- **maxMemoriaGB**: Capacidad máxima de memoria RAM soportada en GB
+
+#### Memoria RAM
+
+- **marca**: Marca del fabricante (ej. Kingston, TeamGroup, Hiksemi, Adata)
+- **tipoMemoria**: Coincidencia con Placa Madre (DDR4, DDR5)
+- **factorForma**: Formato de la memoria (DIMM, SODIMM)
+- **capacidadGB**: Capacidad por módulo en Gigabytes
+- **frecuenciaMHz**: Frecuencia de operación en MHz
+
+#### Tarjeta de Video (GPU)
+
+- **marca**: Marca del fabricante (ej. ASUS, Gigabyte, MSI, XFX)
+- **vramGB**: Capacidad de memoria de video en GB
+- **consumoRecomendadoFuenteWatts**: Requerimiento de potencia mínimo para la PSU
+- **largoMm**: Longitud física en milímetros (Crucial para validación de espacio en Case)
+
+#### Sistema de Refrigeración (Fan Cooler / Líquida AIO)
+
+- **marca**: Marca del fabricante (ej. Noctua, Teros, ASUS, MSI, Gigabyte)
+- **socketsSoportados**: Array de sockets compatibles (ej. ["LGA1700", "AM5", "LGA1851"])
+- **tdpSoportadoWatts**: Capacidad de disipación térmica (Debe ser mayor o igual al tdp del CPU)
+- **tipoRefrigeracion**: Tipo de disipador (Aire, Líquida AIO)
+- **numeroVentiladores**: Cantidad de ventiladores o tamaño del radiador (1, 2, 3 / 120mm, 240mm, 360mm)
+
+#### Gabinete (Case)
+
+- **marca**: Marca del fabricante (ej. Teros, ASUS, Gigabyte, MSI)
+- **soportaFactoresForma**: Array de placas soportadas (ej. ["E-ATX", "ATX", "Micro-ATX", "Mini-ITX"])
+- **largoMaxGpuMm**: Espacio libre máximo para la GPU en milímetros
+- **tieneFuentePoder**: Boolean (Indica si incluye fuente de poder integrada)
+- **potenciaFuenteWatts**: Potencia en Watts de la fuente incluida (0 si no incluye)
+- **soportaFanCoolerVentiladores**: Número máximo de ventiladores o formato de radiador soportado (1, 2, 3)
+
+#### Fuente de Poder (PSU)
+
+- **marca**: Marca del fabricante (ej. ASUS, Gigabyte, MSI, ASRock, Teros)
+- **potenciaWatts**: Potencia continua real en Watts
+- **certificacion80Plus**: Nivel de eficiencia (Bronze, Gold, Platinum, Titanium)
+- **esModular**: Boolean (Modular, Semi-modular, No modular)
+- **factorForma**: Formato físico (ATX, SFX)
+
+## 3. Flujo de Filtrado Dinámico en Cascada (UX)
+
+El configurador guiará al usuario paso a paso, aplicando filtros dinámicos en un orden estricto de compatibilidad térmica, eléctrica y de dimensión física:
+
+```
+[Paso 1: Procesador (CPU)]
+    ↓ (Filtra por Socket)
+[Paso 2: Placa Madre]
+    ↓ (Filtra por Tipo de Memoria)
+[Paso 3: Memoria RAM]
+    ↓ (Filtra por Espacio y Consumo)
+[Paso 4: Tarjeta Video (GPU)]
+    ↓ (Validación por regla de CPU)
+[Paso 5: Fan Cooler / AIO]
+    ↓ (Validación de dimensiones combinadas)
+[Paso 6: Gabinete (Case)]
+    ↓ (Cálculo acumulado de potencia)
+[Paso 7: Fuente de Poder]
+```
+
+### Ejemplo de Flujo
+
+- **Paso 1**: Selecciona CPU (ej. AM5, TDP 105W, requiereCooler: true)
+- **Paso 2**: Solo muestra Placas con Socket AM5
+- **Paso 3**: Solo muestra RAMs DDR5 (Validando slots y máx GB)
+- **Paso 4**: Selecciona GPU (ej. Largo 300mm, Fuente Rec. 650W)
+- **Paso 5**: OBLIGATORIO si requiereCooler: true. Filtra disipadores con tdpSoportado >= 105W y Socket AM5.
+- **Paso 6**: Filtra Cases con soportaFactoresForma matching Placa, largoMaxGpuMm >= 300mm y soportaFanCoolerVentiladores.
+- **Paso 7**: Opcional / Auto-validado si el Case tieneFuentePoder. Sino, filtra fuentes de potenciaWatts >= consumo recomendado.
+
+## 4. Exigencias y Reglas de Validación por Paso
+
+### Paso 1 (CPU)
+Determina las bases del sistema (socket, tipoMemoria) y activa la regla de obligatoriedad según requiereCooler.
+
+### Paso 2 (Placa Madre)
+Exige coincidencia exacta del atributo socket con el CPU seleccionado.
+
+### Paso 3 (RAM)
+Exige coincidencia exacta del atributo tipoMemoria con la Placa Madre seleccionada.
+
+### Paso 4 (GPU)
+Si se selecciona una tarjeta de video dedicada, registra su largoMm y su consumoRecomendadoFuenteWatts.
+
+### Paso 5 (Cooler)
+
+- **Bloqueante / Obligatorio**: Si el CPU tiene requiereCooler: true.
+- **Opcional**: Si el CPU incluye disipador de fábrica (requiereCooler: false).
+- **Filtro**: Muestra únicamente disipadores compatibles con el socket del CPU y cuya capacidad tdpSoportadoWatts sea mayor o igual al tdp del procesador.
+
+### Paso 6 (Case)
+
+- Exige compatibilidad con el factorForma de la Placa Madre seleccionada.
+- Si se seleccionó una GPU en el Paso 4, exige obligatoriamente largoMaxGpuMm >= largoMm de la tarjeta.
+- Exige que el gabinete cuente con soportaFanCoolerVentiladores >= numeroVentiladores del Cooler seleccionado en el Paso 5.
+
+### Paso 7 (Fuente de Poder)
+
+- Si el Case elegido en el Paso 6 ya cuenta con fuente (tieneFuentePoder: true), valida si potenciaFuenteWatts satisface el consumo acumulado.
+- Si tieneFuentePoder: false, la selección de PSU se vuelve Obligatoria, filtrando únicamente fuentes con potenciaWatts mayor o igual al requerimiento total del sistema (o al consumo recomendado por la GPU).
