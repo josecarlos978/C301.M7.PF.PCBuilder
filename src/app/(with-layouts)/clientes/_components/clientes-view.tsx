@@ -96,7 +96,7 @@ export default function ClientesView() {
       <PageHeader
         titulo="Clientes"
         items={[
-          { href: "/", label: "Home" },
+          { href: "/admin", label: "Home" },
           { href: "/clientes", label: "CRM" },
           { href: "/clientes", label: "Clientes" },
         ]}

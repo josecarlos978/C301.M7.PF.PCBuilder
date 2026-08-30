@@ -76,7 +76,7 @@ export default function CotizacionesView() {
       <PageHeader
         titulo="Cotizaciones"
         items={[
-          { href: "/", label: "Home" },
+          { href: "/admin", label: "Home" },
           { href: "/cotizaciones", label: "CRM" },
           { href: "/cotizaciones", label: "Cotizaciones" },
         ]}

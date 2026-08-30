@@ -3,8 +3,7 @@
 import { buttonStyles } from '@/components/tailgrids/core/button';
 import { CollapsibleGroup } from '@/components/tailgrids/core/collapsible';
 import { cn } from '@/utils/cn';
-import { Logo, LogoWithText, LogoWithTextDark } from '@/utils/icon';
-import { useTheme } from 'next-themes';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -26,7 +25,6 @@ export default function Sidebar({
     onItemClick?: () => void;
 }) {
     const pathname = usePathname();
-    const { theme } = useTheme();
 
     // Compute which group should be open based on the current route
     const activeGroupKey = useMemo(
@@ -49,17 +47,25 @@ export default function Sidebar({
                         : 'flex-col justify-center gap-4',
                 )}
             >
-                <Link href='/'>
+                <Link href='/admin'>
                     {isSidebarOpen ? (
-                        <>
-                            {theme === 'light' ? (
-                                <LogoWithText />
-                            ) : (
-                                <LogoWithTextDark />
-                            )}
-                        </>
+                        <Image
+                            src='/logo-cym.png'
+                            alt='CyM Computadoras e Ingeniería'
+                            width={140}
+                            height={68}
+                            className='h-10 w-auto'
+                            priority
+                        />
                     ) : (
-                        <Logo />
+                        <Image
+                            src='/logo-cym-mark.png'
+                            alt='CyM'
+                            width={40}
+                            height={45}
+                            className='h-10 w-auto'
+                            priority
+                        />
                     )}
                 </Link>
 

@@ -55,8 +55,8 @@ export const NAV_DATA = [
         icon: <HomeIcon />,
         items: [
           {
-            title: "E-commerce",
-            url: "/",
+            title: "Resumen general",
+            url: "/admin",
           },
           
         ],

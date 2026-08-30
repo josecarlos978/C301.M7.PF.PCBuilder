@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { KpiCards } from "@/components/crm/shared/kpi-cards";
 import { PageHeader } from "@/components/crm/shared/page-header";
+import { TablaTopProductos } from "@/components/crm/shared/tabla-top-productos";
 import { Skeleton } from "@/components/tailgrids/core/skeleton";
 import { generarReporte } from "@/services/api/reportes/client";
 import { ChartEstados } from "./chart-estados-pie";
 import { ChartIngresosMes } from "./chart-ingresos-mes";
-import { KpiCards } from "./kpi-cards";
-import { TablaTopProductos } from "./tabla-top-productos";
 
 export default function ReportesView() {
   const reporteQuery = useQuery({
@@ -20,7 +20,7 @@ export default function ReportesView() {
       <PageHeader
         titulo="Reportes"
         items={[
-          { href: "/", label: "Home" },
+          { href: "/admin", label: "Home" },
           { href: "/reportes", label: "CRM" },
           { href: "/reportes", label: "Reportes" },
         ]}

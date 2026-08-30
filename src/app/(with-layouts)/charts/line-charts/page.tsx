@@ -16,7 +16,7 @@ export default function LineChartsPage() {
         <Breadcrumbs
           dividerType="chevron"
           items={[
-            { href: "/", label: "Home" },
+            { href: "/admin", label: "Home" },
             { href: "/charts/line-charts", label: "Charts" },
             { href: "/charts/line-charts", label: "Line Charts" },
           ]}

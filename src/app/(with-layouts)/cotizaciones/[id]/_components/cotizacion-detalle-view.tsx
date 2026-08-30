@@ -67,7 +67,7 @@ export default function CotizacionDetalleView({ id }: CotizacionDetalleViewProps
         <PageHeader
           titulo="Detalle de cotización"
           items={[
-            { href: "/", label: "Home" },
+            { href: "/admin", label: "Home" },
             { href: "/cotizaciones", label: "CRM" },
             { href: `/cotizaciones/${id}`, label: `#${id}` },
           ]}
@@ -95,7 +95,7 @@ export default function CotizacionDetalleView({ id }: CotizacionDetalleViewProps
       <PageHeader
         titulo={`Cotización #${String(cotizacion.id).padStart(4, "0")}`}
         items={[
-          { href: "/", label: "Home" },
+          { href: "/admin", label: "Home" },
           { href: "/cotizaciones", label: "CRM" },
           { href: `/cotizaciones/${cotizacion.id}`, label: `#${cotizacion.id}` },
         ]}

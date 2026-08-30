@@ -108,7 +108,7 @@ export default function ProductosView() {
       <PageHeader
         titulo="Productos"
         items={[
-          { href: "/", label: "Home" },
+          { href: "/admin", label: "Home" },
           { href: "/productos", label: "CRM" },
           { href: "/productos", label: "Productos" },
         ]}

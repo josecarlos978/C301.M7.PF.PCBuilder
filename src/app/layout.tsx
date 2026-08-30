@@ -13,11 +13,10 @@ const geistInter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | NextAdmin - Next.js Dashboard Kit",
-    default: "NextAdmin - Next.js Dashboard Kit",
+    template: "%s | CyM",
+    default: "CyM — Computadoras e Ingeniería",
   },
-  description:
-    "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.",
+  description: "Panel de administración y tienda de CyM Computadoras e Ingeniería.",
 };
 
 export default function RootLayout({

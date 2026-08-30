@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { TiendaProviders } from "@/components/tienda/tienda-providers";
 import { CarritoTrigger } from "@/components/tienda/carrito-trigger";
@@ -6,8 +7,8 @@ import { NOMBRE_TIENDA } from "@/config/tienda";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | PCBuilder",
-    default: "PCBuilder — Arma tu PC a medida",
+    template: "%s | CyM",
+    absolute: "CyM — Arma tu PC a medida",
   },
   description:
     "Configura tu PC por partes, valida la compatibilidad y recibe tu cotización al instante.",
@@ -20,11 +21,15 @@ export default function TiendaLayout({ children }: { children: React.ReactNode }
         <header className="sticky top-0 z-20 border-b border-card-border bg-card-surface-area/95 backdrop-blur">
           <div className="mx-auto flex w-full max-w-384 items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
             <div className="flex items-center gap-6">
-              <Link href="/configurador" className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-primary-500 text-sm font-bold text-white-100">
-                  PC
-                </span>
-                <span className="text-lg font-bold text-text-primary">{NOMBRE_TIENDA}</span>
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/logo-cym.png"
+                  alt={NOMBRE_TIENDA}
+                  width={140}
+                  height={68}
+                  className="h-9 w-auto"
+                  priority
+                />
               </Link>
               <nav className="flex items-center gap-4">
                 <Link

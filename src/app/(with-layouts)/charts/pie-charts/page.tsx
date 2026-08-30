@@ -16,7 +16,7 @@ export default function PieChartsPage() {
         <Breadcrumbs
           dividerType="chevron"
           items={[
-            { href: "/", label: "Home" },
+            { href: "/admin", label: "Home" },
             { href: "/charts/pie-charts", label: "Charts" },
             { href: "/charts/pie-charts", label: "Pie Charts" },
           ]}

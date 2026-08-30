@@ -17,7 +17,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
           <Breadcrumbs
             dividerType="chevron"
             items={[
-              { href: "/", label: "Home" },
+              { href: "/admin", label: "Home" },
               { href: "/profile", label: "Profile" },
             ]}
           />
