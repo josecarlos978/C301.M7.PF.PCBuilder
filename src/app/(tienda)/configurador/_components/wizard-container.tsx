@@ -6,13 +6,15 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
+import { CpuFiltros } from "@/components/configurador/cpu-filtros";
 import { OpcionesGrid } from "@/components/configurador/opciones-grid";
+import { RamInfo } from "@/components/configurador/ram-info";
 import { StepIndicator } from "@/components/configurador/step-indicator";
 import { ValidacionAlerts } from "@/components/configurador/validacion-alerts";
 import type { ValidacionCompleta } from "@/services/api/configurador/client";
 import { obtenerOpcionesPaso, validarConfiguracion } from "@/services/api/configurador/client";
 import { listarProductos } from "@/services/api/productos/client";
-import { booleano, numero } from "@/services/pcbuilder/atributos";
+import { booleano, numero, texto } from "@/services/pcbuilder/atributos";
 import type {
   EvaluacionProducto,
   Paso,
@@ -20,11 +22,18 @@ import type {
   SeleccionConfiguracion,
 } from "@/services/pcbuilder/types";
 import { DEFINICION_PASOS } from "@/components/configurador/pasos-config";
+import { ComprarOnlineDialog } from "./comprar-online-dialog";
 import { EnviarWhatsAppDialog } from "./enviar-whatsapp-dialog";
 import { descargarCotizacionHtml } from "./cotizacion-archivos";
 import { ResumenPanel, type FilaResumen } from "./resumen-panel";
 
 const CATEGORIA_CPU = "Procesadores";
+
+interface FiltrosCpu {
+  marca: string;
+  socket: string;
+  precioMax: string;
+}
 
 export default function WizardContainer() {
   const [indicePaso, setIndicePaso] = useState(0);
@@ -32,6 +41,12 @@ export default function WizardContainer() {
   const [elegidos, setElegidos] = useState<Record<number, ProductoDTO>>({});
   const [resultadoValidacion, setResultadoValidacion] = useState<ValidacionCompleta | null>(null);
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
+  const [dialogoCompraAbierto, setDialogoCompraAbierto] = useState(false);
+  const [filtrosCpu, setFiltrosCpu] = useState<FiltrosCpu>({
+    marca: "todas",
+    socket: "todos",
+    precioMax: "",
+  });
 
   const pasoActual = DEFINICION_PASOS[indicePaso].paso;
 
@@ -49,14 +64,42 @@ export default function WizardContainer() {
     staleTime: 30_000,
   });
 
-  const opciones = useMemo<EvaluacionProducto[]>(() => {
-    if (pasoActual === "cpu") {
-      return (cpuQuery.data ?? []).map((producto) => ({ producto, compatible: true, motivos: [] }));
-    }
-    return opcionesQuery.data?.opciones ?? [];
-  }, [pasoActual, cpuQuery.data, opcionesQuery.data]);
+  const cpus = useMemo(() => cpuQuery.data ?? [], [cpuQuery.data]);
+  const marcasCpu = useMemo(
+    () =>
+      Array.from(new Set(cpus.map((p) => p.marca)))
+        .filter(Boolean)
+        .sort(),
+    [cpus],
+  );
+  const socketsCpu = useMemo(
+    () =>
+      Array.from(new Set(cpus.map((p) => texto(p.atributos, "socket"))))
+        .filter((valor): valor is string => Boolean(valor))
+        .sort(),
+    [cpus],
+  );
+  const cpusFiltrados = useMemo(() => {
+    return cpus.filter((p) => {
+      if (filtrosCpu.marca !== "todas" && p.marca !== filtrosCpu.marca) return false;
+      if (filtrosCpu.socket !== "todos" && texto(p.atributos, "socket") !== filtrosCpu.socket)
+        return false;
+      if (filtrosCpu.precioMax.trim() !== "") {
+        const maximo = Number(filtrosCpu.precioMax);
+        if (Number.isFinite(maximo) && p.precioVenta > maximo) return false;
+      }
+      return true;
+    });
+  }, [cpus, filtrosCpu]);
 
   const cargando = pasoActual === "cpu" ? cpuQuery.isPending : opcionesQuery.isPending;
+
+  const opciones = useMemo<EvaluacionProducto[]>(() => {
+    if (pasoActual === "cpu") {
+      return cpusFiltrados.map((producto) => ({ producto, compatible: true, motivos: [] }));
+    }
+    return opcionesQuery.data?.opciones ?? [];
+  }, [pasoActual, cpusFiltrados, opcionesQuery.data]);
 
   const validarMutation = useMutation({
     mutationFn: () => validarConfiguracion(seleccion),
@@ -69,6 +112,11 @@ export default function WizardContainer() {
 
   const cpuElegido = seleccion.cpuId ? elegidos[seleccion.cpuId] : undefined;
   const caseElegido = seleccion.caseId ? elegidos[seleccion.caseId] : undefined;
+  const placaElegida = seleccion.placaId ? elegidos[seleccion.placaId] : undefined;
+  const ramCapacidadGB = (seleccion.ramIds ?? []).reduce(
+    (suma, id) => suma + (numero(elegidos[id]?.atributos ?? {}, "capacidadGB") ?? 0),
+    0,
+  );
   const requiereCooler = !cpuElegido || booleano(cpuElegido.atributos, "requiereCooler");
   const requiereGpu = !cpuElegido || !booleano(cpuElegido.atributos, "tieneGraficosIntegrados");
   const requierePsu = !caseElegido || !booleano(caseElegido.atributos, "tieneFuentePoder");
@@ -114,11 +162,22 @@ export default function WizardContainer() {
       if (yaEsta) {
         nuevos = actuales.filter((id) => id !== productoId);
       } else {
-        const slotsPlaca = seleccion.placaId
-          ? numero(elegidos[seleccion.placaId]?.atributos ?? {}, "ramSlots")
-          : undefined;
+        const placaElegida = seleccion.placaId ? elegidos[seleccion.placaId] : undefined;
+        const slotsPlaca = placaElegida ? numero(placaElegida.atributos, "ramSlots") : undefined;
         if (slotsPlaca !== undefined && actuales.length >= slotsPlaca) {
           toast.warning(`La placa solo admite ${slotsPlaca} módulos de RAM`);
+          return;
+        }
+        const maxCapacidadGB = placaElegida
+          ? numero(placaElegida.atributos, "maxMemoriaGB")
+          : undefined;
+        const capacidadModulo = numero(producto.atributos, "capacidadGB") ?? 0;
+        const capacidadActual = actuales.reduce(
+          (suma, id) => suma + (numero(elegidos[id]?.atributos ?? {}, "capacidadGB") ?? 0),
+          0,
+        );
+        if (maxCapacidadGB !== undefined && capacidadActual + capacidadModulo > maxCapacidadGB) {
+          toast.warning(`La placa soporta hasta ${maxCapacidadGB} GB de RAM`);
           return;
         }
         nuevos = [...actuales, productoId];
@@ -243,10 +302,40 @@ export default function WizardContainer() {
             </div>
           </div>
 
+          {pasoActual === "cpu" && (
+            <CpuFiltros
+              marcas={marcasCpu}
+              sockets={socketsCpu}
+              marca={filtrosCpu.marca}
+              socket={filtrosCpu.socket}
+              precioMax={filtrosCpu.precioMax}
+              total={cpusFiltrados.length}
+              onMarca={(marca) => setFiltrosCpu((f) => ({ ...f, marca }))}
+              onSocket={(socket) => setFiltrosCpu((f) => ({ ...f, socket }))}
+              onPrecioMax={(precioMax) => setFiltrosCpu((f) => ({ ...f, precioMax }))}
+              onLimpiar={() =>
+                setFiltrosCpu({ marca: "todas", socket: "todos", precioMax: "" })
+              }
+            />
+          )}
+
+          {pasoActual === "ram" && (
+            <RamInfo
+              placa={placaElegida}
+              cantidadModulos={seleccion.ramIds?.length ?? 0}
+              capacidadGB={ramCapacidadGB}
+            />
+          )}
+
           <OpcionesGrid
             opciones={opciones}
             idsSeleccionados={idsActuales}
             cargando={cargando}
+            mensajeVacio={
+              pasoActual === "cpu"
+                ? "No hay procesadores que coincidan con los filtros."
+                : undefined
+            }
             onSeleccionar={(id) =>
               seleccionarProducto(id, opciones.find((o) => o.producto.id === id)?.producto)
             }
@@ -269,6 +358,7 @@ export default function WizardContainer() {
             validando={validarMutation.isPending}
             puedeEnviar={puedeEnviar}
             onValidar={() => validarMutation.mutate()}
+            onComprarOnline={() => setDialogoCompraAbierto(true)}
             onDescargar={descargar}
             onEnviarWhatsApp={() => setDialogoAbierto(true)}
             onLimpiar={limpiar}
@@ -280,6 +370,14 @@ export default function WizardContainer() {
       <EnviarWhatsAppDialog
         abierto={dialogoAbierto}
         onOpenChange={setDialogoAbierto}
+        filas={filasResumen}
+        total={total}
+        detalles={detallesCotizacion}
+      />
+
+      <ComprarOnlineDialog
+        abierto={dialogoCompraAbierto}
+        onOpenChange={setDialogoCompraAbierto}
         filas={filasResumen}
         total={total}
         detalles={detallesCotizacion}

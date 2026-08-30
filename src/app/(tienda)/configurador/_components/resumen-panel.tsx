@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Download1, Trash1, Whatsapp } from "@tailgrids/icons";
+import { BagShopping2, Check, Download1, Trash1, Whatsapp } from "@tailgrids/icons";
 import { Button } from "@/components/tailgrids/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/tailgrids/core/card";
 import type { ProductoDTO } from "@/services/pcbuilder/types";
@@ -18,6 +18,7 @@ interface ResumenPanelProps {
   validando: boolean;
   puedeEnviar: boolean;
   onValidar: () => void;
+  onComprarOnline: () => void;
   onDescargar: () => void;
   onEnviarWhatsApp: () => void;
   onLimpiar: () => void;
@@ -29,6 +30,7 @@ export function ResumenPanel({
   validando,
   puedeEnviar,
   onValidar,
+  onComprarOnline,
   onDescargar,
   onEnviarWhatsApp,
   onLimpiar,
@@ -74,8 +76,13 @@ export function ResumenPanel({
             <Check className="size-4" />
             {validando ? "Validando..." : "Validar compatibilidad"}
           </Button>
+          <Button variant="success" onPress={onComprarOnline} isDisabled={!puedeEnviar}>
+            <BagShopping2 className="size-4" />
+            Comprar Online
+          </Button>
           <Button
             variant="success"
+            appearance="outline"
             onPress={onEnviarWhatsApp}
             isDisabled={!puedeEnviar}
           >

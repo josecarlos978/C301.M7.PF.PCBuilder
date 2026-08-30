@@ -9,10 +9,17 @@ interface OpcionesGridProps {
   opciones: EvaluacionProducto[];
   idsSeleccionados: number[];
   cargando: boolean;
+  mensajeVacio?: string;
   onSeleccionar: (productoId: number) => void;
 }
 
-export function OpcionesGrid({ opciones, idsSeleccionados, cargando, onSeleccionar }: OpcionesGridProps) {
+export function OpcionesGrid({
+  opciones,
+  idsSeleccionados,
+  cargando,
+  mensajeVacio,
+  onSeleccionar,
+}: OpcionesGridProps) {
   if (cargando) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -28,7 +35,7 @@ export function OpcionesGrid({ opciones, idsSeleccionados, cargando, onSeleccion
       <Alert status="info">
         <AlertIndicator />
         <AlertDescription>
-          No hay productos disponibles para este paso en el inventario.
+          {mensajeVacio ?? "No hay productos disponibles para este paso en el inventario."}
         </AlertDescription>
       </Alert>
     );
