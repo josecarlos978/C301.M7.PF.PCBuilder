@@ -23,8 +23,9 @@ export function CarritoTrigger() {
           </span>
         )}
       </SheetTrigger>
-      <SheetOverlay isDismissable />
-      <CarritoSheet onOpenChange={setAbierto} />
+      <SheetOverlay isDismissable>
+        <CarritoSheet onOpenChange={setAbierto} />
+      </SheetOverlay>
     </Sheet>
   );
 }

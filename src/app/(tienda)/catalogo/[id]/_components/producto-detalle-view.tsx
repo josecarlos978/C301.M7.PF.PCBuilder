@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/tailgrids/core/skeleton";
 import { WHATSAPP_ADMIN } from "@/config/tienda";
 import { obtenerProducto } from "@/services/api/productos/client";
 import { ProductoAtributos } from "@/components/tienda/producto-atributos";
+import { ProductoImagen } from "@/components/tienda/producto-imagen";
 import { useCarrito } from "@/components/tienda/carrito-context";
 import { abrirWhatsApp, construirMensajeProductoWhatsApp } from "@/components/tienda/whatsapp";
 import formatCurrency from "@/utils/format-currency";
@@ -22,7 +23,7 @@ export function ProductoDetalleView({ productoId }: { productoId: number }) {
     queryFn: () => obtenerProducto(productoId),
   });
   const carrito = useCarrito();
-  const producto = query.data;
+  const producto = query.data?.activo ? query.data : undefined;
 
   function agregarAlCarrito() {
     if (!producto) return;
@@ -76,7 +77,13 @@ export function ProductoDetalleView({ productoId }: { productoId: number }) {
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card className="p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <ProductoImagen
+            imagenUrl={producto.imagenUrl}
+            nombre={producto.nombre}
+            className="aspect-video w-full rounded-lg"
+          />
+
+          <div className="mt-6 flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-2xl font-bold text-text-primary">{producto.nombre}</h1>
               <p className="mt-1 text-sm text-text-secondary">{producto.marca}</p>

@@ -6,7 +6,7 @@ import {
   LogoutIcon,
   UserCircleIcon,
 } from "@/components/common/header/icons";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/tailgrids/core/avatar";
+import { Avatar, AvatarFallback } from "@/components/tailgrids/core/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/tailgrids/core/dropdown";
 import { AltArrowDownIcon } from "@/utils/icon";
+import { logout } from "@/services/auth/actions";
 import Link from "next/link";
 
 interface UserProfileMenuItem {
@@ -25,17 +26,8 @@ interface UserProfileMenuItem {
   label: string;
 }
 
-interface UserProfile {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-}
-
-const user: UserProfile = {
-  name: "Jhon Smith",
-  email: "jhonsmith@example.com",
-  avatarUrl: "/images/user/jhon-smith.png",
-};
+// Login de un solo admin compartido (sin tabla de usuarios), por eso no hay nombre/correo real.
+const ADMIN_LABEL = "Administrador";
 
 export function UserProfileButton() {
   const menuItems: UserProfileMenuItem[] = [
@@ -60,13 +52,12 @@ export function UserProfileButton() {
     <DropdownMenu>
       <DropdownMenuTrigger className="group flex items-center gap-2.5 rounded-lg border-0 p-0 transition-all outline-none focus-visible:ring-4 focus-visible:ring-input-primary-focus-border/20 focus-visible:ring-offset-1">
         <Avatar>
-          <AvatarImage src={user.avatarUrl!} alt={user.name} className="size-10 rounded-lg" />
           <AvatarFallback className="rounded-lg border border-border-secondary-alt bg-background-gray-secondary_alt">
-            {user.name.charAt(0)}
+            {ADMIN_LABEL.charAt(0)}
           </AvatarFallback>
         </Avatar>
 
-        <span className="text-sm leading-5 font-medium text-text-primary">{user.name}</span>
+        <span className="text-sm leading-5 font-medium text-text-primary">{ADMIN_LABEL}</span>
 
         <AltArrowDownIcon className="text-icon-tertiary transition-transform duration-200 group-aria-expanded:-rotate-180" />
       </DropdownMenuTrigger>
@@ -74,14 +65,12 @@ export function UserProfileButton() {
       <DropdownMenuContent placement="bottom end" className="w-70 overflow-hidden p-0 shadow-3xl">
         <DropdownMenuHeader className="flex w-full items-center justify-start gap-2 border-b border-border-secondary-alt px-4 py-3">
           <Avatar size="md">
-            <AvatarImage src={user.avatarUrl!} alt={user.name} />
             <AvatarFallback className="border border-border-secondary-alt bg-background-gray-secondary_alt">
-              {user.name.charAt(0)}
+              {ADMIN_LABEL.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <span className="flex flex-col">
-            <span className="text-sm font-medium text-text-primary">{user.name}</span>
-            <span className="truncate text-xs text-gray-500">{user.email}</span>
+            <span className="text-sm font-medium text-text-primary">{ADMIN_LABEL}</span>
           </span>
         </DropdownMenuHeader>
 
@@ -107,7 +96,7 @@ export function UserProfileButton() {
 
         <DropdownMenuItem
           onAction={() => {
-            // logout handler
+            logout();
           }}
           className="m-1.5 w-auto cursor-pointer px-3 py-2.5"
         >

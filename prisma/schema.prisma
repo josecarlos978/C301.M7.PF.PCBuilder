@@ -17,6 +17,8 @@ model Producto {
   precioVenta  Float
   categoria    String
   subcategoria String
+  imagenUrl    String?
+  activo       Boolean             @default(true)
   atributos    ProductoAtributo[]
   cotizaciones CotizacionDetalle[]
   createdAt    DateTime            @default(now())

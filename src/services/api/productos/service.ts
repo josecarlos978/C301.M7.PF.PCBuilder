@@ -19,12 +19,18 @@ export function aDTO(producto: ProductoConAtributos): ProductoDTO {
     precioVenta: producto.precioVenta,
     categoria: producto.categoria,
     subcategoria: producto.subcategoria,
+    imagenUrl: producto.imagenUrl,
+    activo: producto.activo,
     atributos,
   };
 }
 
 export async function listarProductos(filtros: ProductoFiltros = {}): Promise<ProductoDTO[]> {
   const where: Prisma.ProductoWhereInput = {};
+
+  if (!filtros.incluirOcultos) {
+    where.activo = true;
+  }
 
   if (filtros.categoria) {
     where.categoria = filtros.categoria;
@@ -67,6 +73,7 @@ export async function crearProducto(input: ProductoInput): Promise<ProductoDTO> 
       precioVenta: input.precioVenta,
       categoria: input.categoria,
       subcategoria: input.subcategoria,
+      imagenUrl: input.imagenUrl,
       atributos: {
         create: Object.entries(input.atributos ?? {}).map(([clave, valor]) => ({ clave, valor })),
       },
@@ -97,6 +104,27 @@ export async function actualizarProducto(id: number, input: Partial<ProductoInpu
   });
 
   return aDTO(producto);
+}
+
+export async function importarProductos(inputs: ProductoInput[]): Promise<number> {
+  await prisma.$transaction(
+    inputs.map((input) =>
+      prisma.producto.create({
+        data: {
+          nombre: input.nombre,
+          marca: input.marca,
+          precioVenta: input.precioVenta,
+          categoria: input.categoria,
+          subcategoria: input.subcategoria,
+          imagenUrl: input.imagenUrl,
+          atributos: {
+            create: Object.entries(input.atributos ?? {}).map(([clave, valor]) => ({ clave, valor })),
+          },
+        },
+      }),
+    ),
+  );
+  return inputs.length;
 }
 
 export async function eliminarProducto(id: number): Promise<boolean> {

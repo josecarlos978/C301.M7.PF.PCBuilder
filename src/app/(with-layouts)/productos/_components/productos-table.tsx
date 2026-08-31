@@ -1,35 +1,55 @@
 "use client";
 
-import { Pencil1, Trash1 } from "@tailgrids/icons";
+import { Eye, EyeDisabled, Pencil1 } from "@tailgrids/icons";
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/crm/shared/data-table";
 import { Badge } from "@/components/tailgrids/core/badge";
 import { Button } from "@/components/tailgrids/core/button";
 import type { ProductoDTO } from "@/services/api/productos/client";
+import { ProductoImagen } from "@/components/tienda/producto-imagen";
 import formatCurrency from "@/utils/format-currency";
 
 interface ProductosTableProps {
   productos: ProductoDTO[];
-  eliminando: boolean;
+  cambiandoVisibilidad: boolean;
   onEditar: (producto: ProductoDTO) => void;
-  onEliminar: (producto: ProductoDTO) => void;
+  onCambiarVisibilidad: (producto: ProductoDTO) => void;
 }
 
 const MAX_SPECS_VISIBLES = 3;
 
-export function ProductosTable({ productos, eliminando, onEditar, onEliminar }: ProductosTableProps) {
+export function ProductosTable({
+  productos,
+  cambiandoVisibilidad,
+  onEditar,
+  onCambiarVisibilidad,
+}: ProductosTableProps) {
   const columnas = useMemo<ColumnDef<ProductoDTO, unknown>[]>(
     () => [
       {
         accessorKey: "nombre",
         header: "Producto",
         cell: ({ row }) => (
-          <div>
-            <p className="font-semibold text-text-primary">{row.original.nombre}</p>
-            <p className="text-xs text-text-secondary">
-              {row.original.marca} · {row.original.subcategoria}
-            </p>
+          <div className="flex items-center gap-3">
+            <ProductoImagen
+              imagenUrl={row.original.imagenUrl}
+              nombre={row.original.nombre}
+              className="size-10 shrink-0 rounded-lg"
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="truncate font-semibold text-text-primary">{row.original.nombre}</p>
+                {!row.original.activo && (
+                  <Badge color="gray" size="sm">
+                    Oculto
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-text-secondary">
+                {row.original.marca} · {row.original.subcategoria}
+              </p>
+            </div>
           </div>
         ),
       },
@@ -78,18 +98,18 @@ export function ProductosTable({ productos, eliminando, onEditar, onEliminar }: 
             <Button
               variant="ghost"
               size="xs"
-              className="text-button-error-outline-text!"
-              aria-label={`Eliminar ${row.original.nombre}`}
-              isDisabled={eliminando}
-              onPress={() => onEliminar(row.original)}
+              className={row.original.activo ? "text-button-error-outline-text!" : undefined}
+              aria-label={row.original.activo ? `Ocultar ${row.original.nombre}` : `Mostrar ${row.original.nombre}`}
+              isDisabled={cambiandoVisibilidad}
+              onPress={() => onCambiarVisibilidad(row.original)}
             >
-              <Trash1 className="size-4" />
+              {row.original.activo ? <EyeDisabled className="size-4" /> : <Eye className="size-4" />}
             </Button>
           </div>
         ),
       },
     ],
-    [eliminando, onEditar, onEliminar],
+    [cambiandoVisibilidad, onEditar, onCambiarVisibilidad],
   );
 
   return (

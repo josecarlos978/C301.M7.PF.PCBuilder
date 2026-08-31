@@ -21,17 +21,48 @@ import {
 } from "@/components/tailgrids/core/select";
 import { TextArea } from "@/components/tailgrids/core/text-area";
 import { TextField } from "@/components/tailgrids/core/text-field";
-import Image from "next/image";
+import {
+  AR,
+  AU,
+  BO,
+  BR,
+  CA,
+  CL,
+  CO,
+  EC,
+  FR,
+  GY,
+  IN,
+  IT,
+  PE,
+  PY,
+  SR,
+  US,
+  UY,
+  VE,
+} from "country-flag-icons/react/3x2";
 import { FieldError, Form } from "react-aria-components";
 import { LogoutIcon, TrashIcon } from "./icons";
 
 const countryOptions = [
-  { value: "us", label: "United States", flag: "/images/flag/US.svg" },
-  { value: "ca", label: "Canada", flag: "/images/flag/CA.svg" },
-  { value: "fr", label: "France", flag: "/images/flag/FR.svg" },
-  { value: "au", label: "Australia", flag: "/images/flag/AU.svg" },
-  { value: "it", label: "Italy", flag: "/images/flag/IT.svg" },
-  { value: "in", label: "India", flag: "/images/flag/IN.svg" },
+  { value: "us", label: "United States", Flag: US },
+  { value: "ca", label: "Canada", Flag: CA },
+  { value: "fr", label: "France", Flag: FR },
+  { value: "au", label: "Australia", Flag: AU },
+  { value: "it", label: "Italy", Flag: IT },
+  { value: "in", label: "India", Flag: IN },
+  { value: "pe", label: "Perú", Flag: PE },
+  { value: "ar", label: "Argentina", Flag: AR },
+  { value: "bo", label: "Bolivia", Flag: BO },
+  { value: "ec", label: "Ecuador", Flag: EC },
+  { value: "cl", label: "Chile", Flag: CL },
+  { value: "co", label: "Colombia", Flag: CO },
+  { value: "py", label: "Paraguay", Flag: PY },
+  { value: "uy", label: "Uruguay", Flag: UY },
+  { value: "ve", label: "Venezuela", Flag: VE },
+  { value: "br", label: "Brasil", Flag: BR },
+  { value: "gy", label: "Guyana", Flag: GY },
+  { value: "sr", label: "Surinam", Flag: SR },
 ];
 
 export default function AccountPage() {
@@ -122,12 +153,9 @@ export default function AccountPage() {
                   {countryOptions.map((option) => (
                     <SelectItem key={option.value} id={option.value} textValue={option.label}>
                       <span className="flex items-center gap-2">
-                        <Image
-                          src={option.flag}
-                          alt={option.label}
-                          width={20}
-                          height={20}
-                          className="size-5 rounded-full object-cover"
+                        <option.Flag
+                          title={option.label}
+                          className="size-5 shrink-0 rounded-full object-cover"
                         />
                         <span>{option.label}</span>
                       </span>

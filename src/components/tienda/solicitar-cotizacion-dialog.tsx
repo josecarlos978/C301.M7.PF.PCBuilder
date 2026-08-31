@@ -23,6 +23,7 @@ import {
 import formatCurrency from "@/utils/format-currency";
 import type { ItemCarrito } from "./carrito-context";
 import { DatosClienteForm } from "./datos-cliente-form";
+import { ResumenProductosCarrito } from "./resumen-productos-carrito";
 import { useDatosCliente } from "./use-datos-cliente";
 import { abrirWhatsApp, construirMensajeCarritoWhatsApp } from "./whatsapp";
 
@@ -117,16 +118,19 @@ export function SolicitarCotizacionDialog({
             </p>
           </div>
         ) : (
-          <DatosClienteForm
-            nombre={cliente.nombre}
-            nombreValido={cliente.nombreValido}
-            onNombre={cliente.setNombre}
-            correo={cliente.correo}
-            correoValido={cliente.correoValido}
-            onCorreo={cliente.setCorreo}
-            telefono={cliente.telefono}
-            onTelefono={cliente.setTelefono}
-          />
+          <>
+            <ResumenProductosCarrito items={items} />
+            <DatosClienteForm
+              nombre={cliente.nombre}
+              nombreValido={cliente.nombreValido}
+              onNombre={cliente.setNombre}
+              correo={cliente.correo}
+              correoValido={cliente.correoValido}
+              onCorreo={cliente.setCorreo}
+              telefono={cliente.telefono}
+              onTelefono={cliente.setTelefono}
+            />
+          </>
         )}
       </DialogBody>
 

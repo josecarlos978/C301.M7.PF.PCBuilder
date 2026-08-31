@@ -7,6 +7,7 @@ import { Button } from "@/components/tailgrids/core/button";
 import { Card } from "@/components/tailgrids/core/card";
 import type { ProductoDTO } from "@/services/pcbuilder/types";
 import formatCurrency from "@/utils/format-currency";
+import { ProductoImagen } from "./producto-imagen";
 
 const MAX_ATRIBUTOS = 3;
 
@@ -27,6 +28,14 @@ export function ProductoCard({ producto, enCarrito, onAgregar }: ProductoCardPro
 
   return (
     <Card className="flex flex-col gap-3">
+      <Link href={`/catalogo/${producto.id}`} className="block overflow-hidden rounded-lg">
+        <ProductoImagen
+          imagenUrl={producto.imagenUrl}
+          nombre={producto.nombre}
+          className="aspect-square w-full"
+        />
+      </Link>
+
       <div className="flex items-start justify-between gap-2">
         <Link href={`/catalogo/${producto.id}`} className="group min-w-0">
           <p className="truncate text-sm font-semibold text-text-primary transition-colors group-hover:text-primary-500">

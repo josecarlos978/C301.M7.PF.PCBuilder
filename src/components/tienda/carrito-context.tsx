@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import type { ProductoDTO } from "@/services/pcbuilder/types";
 
 export interface ItemCarrito {
@@ -9,9 +9,9 @@ export interface ItemCarrito {
 }
 
 const CLAVE_STORAGE = "pcbuilder:carrito";
+const SNAPSHOT_VACIO: ItemCarrito[] = [];
 
 function cargarPersistido(): ItemCarrito[] {
-  if (typeof window === "undefined") return [];
   try {
     const crudo = window.localStorage.getItem(CLAVE_STORAGE);
     if (!crudo) return [];
@@ -34,6 +34,41 @@ function cargarPersistido(): ItemCarrito[] {
   }
 }
 
+// Store externo al árbol de React (patrón useSyncExternalStore) para leer/escribir el
+// carrito persistido en localStorage sin mismatch de hidratación ni setState dentro de efectos.
+let itemsActuales: ItemCarrito[] | null = null;
+const listeners = new Set<() => void>();
+
+function obtenerItems(): ItemCarrito[] {
+  if (itemsActuales === null) {
+    itemsActuales = cargarPersistido();
+  }
+  return itemsActuales;
+}
+
+function actualizarItems(actualizador: (prev: ItemCarrito[]) => ItemCarrito[]) {
+  itemsActuales = actualizador(obtenerItems());
+  try {
+    window.localStorage.setItem(CLAVE_STORAGE, JSON.stringify(itemsActuales));
+  } catch {
+    // localStorage no disponible: el carrito vive solo en memoria
+  }
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot(): ItemCarrito[] {
+  return obtenerItems();
+}
+
+function getServerSnapshot(): ItemCarrito[] {
+  return SNAPSHOT_VACIO;
+}
+
 interface CarritoContextValue {
   items: ItemCarrito[];
   total: number;
@@ -48,15 +83,7 @@ interface CarritoContextValue {
 const CarritoContext = createContext<CarritoContextValue | null>(null);
 
 export function CarritoProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<ItemCarrito[]>(cargarPersistido);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(CLAVE_STORAGE, JSON.stringify(items));
-    } catch {
-      // localStorage no disponible: el carrito vive solo en memoria
-    }
-  }, [items]);
+  const items = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const valor = useMemo<CarritoContextValue>(() => {
     return {
@@ -64,7 +91,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       total: items.reduce((suma, item) => suma + item.producto.precioVenta * item.cantidad, 0),
       cantidadItems: items.reduce((suma, item) => suma + item.cantidad, 0),
       agregar(producto) {
-        setItems((prev) => {
+        actualizarItems((prev) => {
           const existente = prev.find((item) => item.producto.id === producto.id);
           if (existente) {
             return prev.map((item) =>
@@ -77,10 +104,10 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         });
       },
       quitar(productoId) {
-        setItems((prev) => prev.filter((item) => item.producto.id !== productoId));
+        actualizarItems((prev) => prev.filter((item) => item.producto.id !== productoId));
       },
       actualizarCantidad(productoId, cantidad) {
-        setItems((prev) =>
+        actualizarItems((prev) =>
           cantidad <= 0
             ? prev.filter((item) => item.producto.id !== productoId)
             : prev.map((item) =>
@@ -89,7 +116,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         );
       },
       vaciar() {
-        setItems([]);
+        actualizarItems(() => []);
       },
       enCarrito(productoId) {
         return items.some((item) => item.producto.id === productoId);

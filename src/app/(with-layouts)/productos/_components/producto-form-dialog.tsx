@@ -24,6 +24,7 @@ import {
 import type { ProductoDTO } from "@/services/api/productos/client";
 import type { ProductoInput } from "@/services/api/productos/types";
 import { CATEGORIA_POR_PASO } from "@/services/pcbuilder/constants";
+import { ProductoImagen } from "@/components/tienda/producto-imagen";
 import { AtributosEditor } from "./atributos-editor";
 
 const CATEGORIAS = Object.values(CATEGORIA_POR_PASO);
@@ -62,6 +63,7 @@ function FormularioProducto({
   const [precioVenta, setPrecioVenta] = useState(producto ? String(producto.precioVenta) : "");
   const [categoria, setCategoria] = useState<string>(producto?.categoria ?? CATEGORIAS[0]);
   const [subcategoria, setSubcategoria] = useState(producto?.subcategoria ?? "");
+  const [imagenUrl, setImagenUrl] = useState(producto?.imagenUrl ?? "");
   const [atributos, setAtributos] = useState<Record<string, string>>(producto?.atributos ?? {});
   const [error, setError] = useState<string | null>(null);
 
@@ -77,6 +79,7 @@ function FormularioProducto({
       precioVenta: precio,
       categoria,
       subcategoria: subcategoria.trim() || categoria,
+      imagenUrl: imagenUrl.trim() || null,
       atributos,
     });
   }
@@ -109,6 +112,23 @@ function FormularioProducto({
           <div className="flex flex-col gap-2">
             <Label htmlFor="producto-subcategoria">Subcategoría</Label>
             <Input id="producto-subcategoria" value={subcategoria} onChange={(e) => setSubcategoria(e.target.value)} placeholder="Ej. Desktop AM5" />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="producto-imagen">URL de imagen (opcional)</Label>
+            <div className="flex items-center gap-3">
+              <ProductoImagen
+                imagenUrl={imagenUrl.trim() || null}
+                nombre={nombre || "?"}
+                className="size-14 shrink-0 rounded-lg"
+              />
+              <Input
+                id="producto-imagen"
+                value={imagenUrl}
+                onChange={(e) => setImagenUrl(e.target.value)}
+                placeholder="https://..."
+                className="flex-1"
+              />
+            </div>
           </div>
         </div>
 

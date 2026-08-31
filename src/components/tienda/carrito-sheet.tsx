@@ -63,19 +63,19 @@ export function CarritoSheet({ onOpenChange }: CarritoSheetProps) {
       </SheetBody>
 
       {!vacio && (
-        <SheetFooter className="flex-col gap-3">
-          <div className="flex items-center justify-between border-t border-card-border pt-3">
-            <span className="text-sm font-medium text-text-secondary">Total estimado</span>
-            <span className="text-lg font-semibold text-text-primary">
+        <SheetFooter className="flex-col gap-2">
+          <div className="flex items-center justify-between border-t border-card-border pt-2">
+            <span className="text-xs font-medium text-text-secondary">Total estimado</span>
+            <span className="text-xs font-semibold text-text-primary">
               {formatCurrency(carrito.total)}
             </span>
           </div>
-          <Button variant="success" onPress={solicitar}>
-            <BagShopping2 className="size-4" />
+          <Button variant="success" size="sm" className="text-xs" onPress={solicitar}>
+            <BagShopping2 className="size-3.5" />
             Solicitar cotización
           </Button>
-          <Button variant="danger" appearance="ghost" size="sm" onPress={carrito.vaciar}>
-            <Trash1 className="size-4" />
+          <Button variant="danger" appearance="ghost" size="xs" className="text-xs" onPress={carrito.vaciar}>
+            <Trash1 className="size-3.5" />
             Vaciar carrito
           </Button>
         </SheetFooter>

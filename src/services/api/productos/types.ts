@@ -6,10 +6,13 @@ export interface ProductoInput {
   precioVenta: number;
   categoria: string;
   subcategoria: string;
+  imagenUrl?: string | null;
+  activo?: boolean;
   atributos?: AtributosProducto;
 }
 
 export interface ProductoFiltros {
   categoria?: string;
   busca?: string;
+  incluirOcultos?: boolean;
 }

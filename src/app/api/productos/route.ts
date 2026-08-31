@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const productos = await listarProductos({
       categoria: searchParams.get("categoria") ?? undefined,
       busca: searchParams.get("busca") ?? undefined,
+      incluirOcultos: searchParams.get("incluirOcultos") === "true",
     });
     return ok(productos);
   } catch (e) {

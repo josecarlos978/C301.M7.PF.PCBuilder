@@ -31,27 +31,29 @@ export function CarritoItemRow({ item, onSumar, onRestar, onQuitar }: CarritoIte
         <Button
           variant="danger"
           appearance="ghost"
-          size="sm"
+          size="xs"
+          iconOnly
           onPress={onQuitar}
           aria-label={`Quitar ${producto.nombre} del carrito`}
         >
-          <Trash1 className="size-4" />
+          <Trash1 className="size-3.5" />
         </Button>
         <div className="flex items-center gap-1">
           <Button
             appearance="outline"
-            size="sm"
+            size="xs"
+            iconOnly
             isDisabled={cantidad <= 1}
             onPress={onRestar}
             aria-label="Disminuir cantidad"
           >
-            <Minus className="size-3.5" />
+            <Minus className="size-3" />
           </Button>
-          <span className="w-7 text-center text-sm font-semibold text-text-primary">
+          <span className="w-6 text-center text-xs font-semibold text-text-primary">
             {cantidad}
           </span>
-          <Button appearance="outline" size="sm" onPress={onSumar} aria-label="Aumentar cantidad">
-            <Plus className="size-3.5" />
+          <Button appearance="outline" size="xs" iconOnly onPress={onSumar} aria-label="Aumentar cantidad">
+            <Plus className="size-3" />
           </Button>
         </div>
       </div>

@@ -17,6 +17,8 @@ export interface ProductoDTO {
   precioVenta: number;
   categoria: string;
   subcategoria: string;
+  imagenUrl: string | null;
+  activo: boolean;
   atributos: AtributosProducto;
 }
 

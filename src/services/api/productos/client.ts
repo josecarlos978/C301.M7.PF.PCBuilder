@@ -4,10 +4,13 @@ import type { ProductoDTO } from "@/services/pcbuilder/types";
 
 export type { ProductoDTO };
 
-export function listarProductos(filtros: { categoria?: string; busca?: string } = {}): Promise<ProductoDTO[]> {
+export function listarProductos(
+  filtros: { categoria?: string; busca?: string; incluirOcultos?: boolean } = {},
+): Promise<ProductoDTO[]> {
   const params = new URLSearchParams();
   if (filtros.categoria) params.set("categoria", filtros.categoria);
   if (filtros.busca) params.set("busca", filtros.busca);
+  if (filtros.incluirOcultos) params.set("incluirOcultos", "true");
   const query = params.toString();
   return apiGet(`/api/productos${query ? `?${query}` : ""}`);
 }
@@ -26,4 +29,8 @@ export function actualizarProducto(id: number, input: Partial<ProductoInput>): P
 
 export function eliminarProducto(id: number): Promise<{ eliminado: boolean }> {
   return apiDelete(`/api/productos/${id}`);
+}
+
+export function importarProductos(productos: ProductoInput[]): Promise<{ importados: number }> {
+  return apiPost("/api/productos/importar", { productos });
 }
